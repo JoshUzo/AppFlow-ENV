@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APPFLOW_NAME: "Josh-variable"
+      SOURCE_OBJECT: "Case"
+      APPFLOW_FILETYPE: "CSV"
+      S3_BUCKET: "josh-test-bucket-${{ github.run_id }}"  # Generate unique bucket name
+      
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -28,10 +32,17 @@ jobs:
           aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region us-east-2
-           
+
+
+      - name: Create S3 bucket
+        run: |
+          aws s3api create-bucket --bucket "$S3_BUCKET" --region us-east-2 \
+            --create-bucket-configuration LocationConstraint=us-east-2
+          echo "S3 Bucket Created: $S3_BUCKET"   
+          
       - name: Update S3 Bucket Policy
         run: |
-          aws s3api put-bucket-policy --bucket appflow864 --policy '{
+          aws s3api put-bucket-policy --bucket "$S3_BUCKET" --policy '{
               "Version": "2012-10-17",
               "Statement": [
                   {
@@ -45,8 +56,8 @@ jobs:
                           "s3:PutObjectAcl"
                       ],
                       "Resource": [
-                          "arn:aws:s3:::appflow864",
-                          "arn:aws:s3:::appflow864/*"
+                          "arn:aws:s3:::${{ env.S3_BUCKET }}",
+                          "arn:aws:s3:::${{ env.S3_BUCKET }}/*"
                       ]
                   }
               ]
@@ -61,7 +72,7 @@ jobs:
               "connectorType": "Salesforce",
               "sourceConnectorProperties": {
                 "Salesforce": {
-                  "object": "Case"
+                  "object": "$SOURCE_OBJECT"
                 }
               },
               "connectorProfileName": "Test-Connection"
@@ -73,7 +84,7 @@ jobs:
                   "S3": {
                     "bucketName": "appflow864",
                     "s3OutputFormatConfig": {
-                      "fileType": "CSV"
+                      "fileType": "$APPFLOW_FILETYPE"
                     }
                   }
                 }
