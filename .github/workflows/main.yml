@@ -115,4 +115,4 @@ jobs:
             "sourceFields": ["CaseNumber"],
             "destinationField": "CaseNumber"
             }]' \
-            --trigger-config '{ "triggerType": "$APPFLOW_TRIGGER_TYPE" }' \
+            --trigger-config "{\"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }" \
