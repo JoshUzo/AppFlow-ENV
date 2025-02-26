@@ -11,7 +11,7 @@ jobs:
     env:
       APPFLOW_NAME: "Josh-variable"
       SOURCE_OBJECT: "Case"
-      APPFLOW_FILETYPE: "CSV"
+      APPFLOW_FILETYPE: "CSV format"
       S3_BUCKET: "josh-test-bucket-${{ github.run_id }}"  # Generate unique bucket name
       
     steps:
