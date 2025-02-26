@@ -11,7 +11,9 @@ jobs:
     env:
       APPFLOW_NAME: "Josh-variable"
       SOURCE_OBJECT: "Case"
-      APPFLOW_FILETYPE: "CSV format"
+      APPFLOW_FILETYPE: "CSV"
+      AWS_REGION: "us-east-2"
+      APPFLOW_TRIGGER_TYPE: "OnDemand"
       S3_BUCKET: "josh-test-bucket-${{ github.run_id }}"  # Generate unique bucket name
       
     steps:
@@ -31,13 +33,13 @@ jobs:
         run: |
           aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region us-east-2
+          aws configure set region $AWS_REGION
 
 
       - name: Create S3 bucket
         run: |
-          aws s3api create-bucket --bucket "$S3_BUCKET" --region us-east-2 \
-            --create-bucket-configuration LocationConstraint=us-east-2
+          aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
+            --create-bucket-configuration LocationConstraint="$AWS_REGION"
           echo "S3 Bucket Created: $S3_BUCKET"   
           
       - name: Update S3 Bucket Policy
@@ -82,9 +84,9 @@ jobs:
                 "connectorType": "S3",
                 "destinationConnectorProperties": {
                   "S3": {
-                    "bucketName": "appflow864",
+                    "bucketName": "$S3_BUCKET",
                     "s3OutputFormatConfig": {
-                      "fileType": "$APPFLOW_FILETYPE"
+                      "fileType": "CSV"
                     }
                   }
                 }
@@ -113,4 +115,4 @@ jobs:
             "sourceFields": ["CaseNumber"],
             "destinationField": "CaseNumber"
             }]' \
-            --trigger-config '{ "triggerType": "OnDemand" }' \
+            --trigger-config '{ "triggerType": "$APPFLOW_TRIGGER_TYPE" }' \
