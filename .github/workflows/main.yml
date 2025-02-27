@@ -75,45 +75,42 @@ jobs:
               \"sourceConnectorProperties\": {
                 \"Salesforce\": {
                   \"object\": \"$SOURCE_OBJECT\"
-                }
-              }
-            }"
-              "connectorProfileName": "Test-Connection"
-            }' \
-            --destination-flow-config-list '[
-              {
-                "connectorType": "S3",
-                "destinationConnectorProperties": {
-                  "S3": {
-                    "bucketName": "$S3_BUCKET",
-                    "s3OutputFormatConfig": {
-                      "fileType": "CSV"
-                    }
-                  }
-                }
-              }
-            ]' \
-            --tasks '[{
-                "sourceFields": ["Id", "ContactEmail", "CaseNumber"],
-                "taskType": "Filter",
-                "connectorOperator": {
-                "Salesforce": "PROJECTION"
-                },
-                "taskProperties": {}
+               }
+             },
+             \"connectorProfileName\": \"Test-Connection\"
+           }" \
+           --destination-flow-config-list "[{
+             \"connectorType\": \"S3\",
+             \"destinationConnectorProperties\": {
+               \"S3\": {
+                 \"bucketName\": \"$S3_BUCKET\",
+                 \"s3OutputFormatConfig\": {
+                   \"fileType\": \"$APPFLOW_FILETYPE\"
+                 }
+               }
+             }
+          }]" \
+          --tasks "[{
+              \"sourceFields\": [\"Id\", \"ContactEmail\", \"CaseNumber\"],
+              \"taskType\": \"Filter\",
+              \"connectorOperator\": {
+                \"Salesforce\": \"PROJECTION\"
+              },
+              \"taskProperties\": {}
             },
             {
-            "taskType": "Map",
-            "sourceFields": ["Id"],
-            "destinationField": "Id"
-            },
-            {
-            "taskType": "Map",
-            "sourceFields": ["ContactEmail"],
-            "destinationField": "ContactEmail"
-            },
-            {
-            "taskType": "Map",
-            "sourceFields": ["CaseNumber"],
-            "destinationField": "CaseNumber"
-            }]' \
-            --trigger-config "{\"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }" \
+          \"taskType\": \"Map\",
+          \"sourceFields\": [\"Id\"],
+          \"destinationField\": \"Id\"
+          },
+          {
+          \"taskType\": \"Map\",
+          \"sourceFields\": [\"ContactEmail\"],
+          \"destinationField\": \"ContactEmail\"
+          },
+          {
+          \"taskType\": \"Map\",
+          \"sourceFields\": [\"CaseNumber\"],
+          \"destinationField\": \"CaseNumber\"
+          }]" \
+          --trigger-config "{ \"triggerType\": \"OnDemand\" }"
