@@ -99,7 +99,7 @@ jobs:
                 "sourceFields": [.],
                 "destinationField": .
               }) | . + [{
-                "sourceFields": ["Id", "ContactEmail", "CaseNumber"],
+                "sourceFields": $SOURCE_FIELDS,
                 "taskType": "Filter",
                 "connectorOperator": {
                   "Salesforce": "PROJECTION"
