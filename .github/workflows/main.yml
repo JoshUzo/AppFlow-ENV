@@ -15,7 +15,8 @@ jobs:
       AWS_REGION: "us-east-2"
       APPFLOW_TRIGGER_TYPE: "OnDemand"
       CONNECTOR_PROFILE_NAME: "Test-Connection"
-      S3_BUCKET: "appflow864"  
+      S3_BUCKET: "josh-appflow-875"  
+      SOURCE_FIELDS: '["Id", "ContactEmail", "CaseNumber"]'
       
     steps:
       - name: Checkout Repository
@@ -39,13 +40,9 @@ jobs:
 
       - name: Create S3 bucket
         run: |
-          if ! aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null; then
-            aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
-              --create-bucket-configuration LocationConstraint="$AWS_REGION"
-            echo "S3 Bucket Created: $S3_BUCKET"
-          else
-            echo "S3 Bucket already exists: $S3_BUCKET"
-          fi  
+          aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
+            --create-bucket-configuration LocationConstraint="$AWS_REGION"
+          echo "S3 Bucket Created: $S3_BUCKET"
           
       - name: Update S3 Bucket Policy
         run: |
@@ -96,26 +93,11 @@ jobs:
              }
           }]" \
           --tasks "[{
-              \"sourceFields\": [\"Id\", \"ContactEmail\", \"CaseNumber\"],
+              \"sourceFields\": $SOURCE_FIELDS,
               \"taskType\": \"Filter\",
               \"connectorOperator\": {
                 \"Salesforce\": \"PROJECTION\"
               },
               \"taskProperties\": {}
-            },
-            {
-          \"taskType\": \"Map\",
-          \"sourceFields\": [\"Id\"],
-          \"destinationField\": \"Id\"
-          },
-          {
-          \"taskType\": \"Map\",
-          \"sourceFields\": [\"ContactEmail\"],
-          \"destinationField\": \"ContactEmail\"
-          },
-          {
-          \"taskType\": \"Map\",
-          \"sourceFields\": [\"CaseNumber\"],
-          \"destinationField\": \"CaseNumber\"
-          }]" \
+            }]" \
           --trigger-config "{ \"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }"
