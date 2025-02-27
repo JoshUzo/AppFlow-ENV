@@ -99,5 +99,12 @@ jobs:
                 \"Salesforce\": \"PROJECTION\"
               },
               \"taskProperties\": {}
-            }]" \
+            },
+            $(echo "$SOURCE_FIELDS" | jq -r '.[] | 
+            "{
+             \"taskType\": \"Map\",
+             \"sourceFields\": [\"\(.\" )\"],
+             \"destinationField\": \"\(.\" )\"
+           }"') 
+          ]" \            
           --trigger-config "{ \"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }"
