@@ -92,19 +92,20 @@ jobs:
                }
              }
           }]" \
-          --tasks "[{
-              \"sourceFields\": $SOURCE_FIELDS,
-              \"taskType\": \"Filter\",
-              \"connectorOperator\": {
-                \"Salesforce\": \"PROJECTION\"
-              },
-              \"taskProperties\": {}
-            },
-            $(echo "$SOURCE_FIELDS" | jq -r '.[] | 
-            "{
-             \"taskType\": \"Map\",
-             \"sourceFields\": [\"\(.\" )\"],
-             \"destinationField\": \"\(.\" )\"
-           }"') 
-          ]" \            
+          --tasks "$(
+            echo "$SOURCE_FIELDS" | jq -c '
+              map({
+                "taskType": "Map",
+                "sourceFields": [.],
+                "destinationField": .
+              }) | . + [{
+                "sourceFields": ["Id", "ContactEmail", "CaseNumber"],
+                "taskType": "Filter",
+                "connectorOperator": {
+                  "Salesforce": "PROJECTION"
+                },
+                "taskProperties": {}
+               }]
+             '
+           )" \
           --trigger-config "{ \"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }"
