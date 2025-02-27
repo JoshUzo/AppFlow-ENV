@@ -14,7 +14,8 @@ jobs:
       APPFLOW_FILETYPE: "CSV"
       AWS_REGION: "us-east-2"
       APPFLOW_TRIGGER_TYPE: "OnDemand"
-      S3_BUCKET: "josh-test-bucket-${{ github.run_id }}"  # Generate unique bucket name
+      CONNECTOR_PROFILE_NAME: "Test-Connection"
+      S3_BUCKET: "appflow864"  
       
     steps:
       - name: Checkout Repository
@@ -38,9 +39,13 @@ jobs:
 
       - name: Create S3 bucket
         run: |
-          aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
-            --create-bucket-configuration LocationConstraint="$AWS_REGION"
-          echo "S3 Bucket Created: $S3_BUCKET"   
+          if ! aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null; then
+            aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
+              --create-bucket-configuration LocationConstraint="$AWS_REGION"
+            echo "S3 Bucket Created: $S3_BUCKET"
+          else
+            echo "S3 Bucket already exists: $S3_BUCKET"
+          fi  
           
       - name: Update S3 Bucket Policy
         run: |
@@ -77,7 +82,7 @@ jobs:
                   \"object\": \"$SOURCE_OBJECT\"
                }
              },
-             \"connectorProfileName\": \"Test-Connection\"
+             \"connectorProfileName\": \"$CONNECTOR_PROFILE_NAME\"
            }" \
            --destination-flow-config-list "[{
              \"connectorType\": \"S3\",
@@ -113,4 +118,4 @@ jobs:
           \"sourceFields\": [\"CaseNumber\"],
           \"destinationField\": \"CaseNumber\"
           }]" \
-          --trigger-config "{ \"triggerType\": \"OnDemand\" }"
+          --trigger-config "{ \"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }"
