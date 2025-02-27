@@ -70,13 +70,14 @@ jobs:
           aws appflow create-flow \
             --flow-name "$APPFLOW_NAME" \
             --description "Sync Salesforce data to S3" \
-            --source-flow-config '{
-              "connectorType": "Salesforce",
-              "sourceConnectorProperties": {
-                "Salesforce": {
-                  "object": "$SOURCE_OBJECT"
+            --source-flow-config "{
+              \"connectorType\": \"Salesforce\",
+              \"sourceConnectorProperties\": {
+                \"Salesforce\": {
+                  \"object\": \"$SOURCE_OBJECT\"
                 }
-              },
+              }
+            }"
               "connectorProfileName": "Test-Connection"
             }' \
             --destination-flow-config-list '[
