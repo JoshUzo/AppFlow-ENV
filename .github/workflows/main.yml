@@ -93,19 +93,18 @@ jobs:
              }
           }]" \
           --tasks "$(
-            echo "$SOURCE_FIELDS" | jq -c '
-              map({
+            echo "$SOURCE_FIELDS" | jq -c --argjson fields "$SOURCE_FIELDS" '
+              # Create the Mapping Tasks dynamically
+              $fields | map({
                 "taskType": "Map",
                 "sourceFields": [.],
                 "destinationField": .
-              }) | . + [{
-                "sourceFields": $SOURCE_FIELDS,
-                "taskType": "Filter",
-                "connectorOperator": {
-                  "Salesforce": "PROJECTION"
-                },
-                "taskProperties": {}
-               }]
-             '
-           )" \
+             })
+             # Add a Filter task at the beginning
+             | [{"taskType": "Filter",
+                 "sourceFields": $fields,
+                 "connectorOperator": {"Salesforce": "PROJECTION"},
+                 "taskProperties": {}}] + .
+           '
+          )" \
           --trigger-config "{ \"triggerType\": \"$APPFLOW_TRIGGER_TYPE\" }"
