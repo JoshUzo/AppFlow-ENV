@@ -40,9 +40,13 @@ jobs:
 
       - name: Create S3 bucket
         run: |
-          aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
-            --create-bucket-configuration LocationConstraint="$AWS_REGION"
-          echo "S3 Bucket Created: $S3_BUCKET"
+          if ! aws s3api head-bucket --bucket "$S3_BUCKET" 2>/dev/null; then
+            aws s3api create-bucket --bucket "$S3_BUCKET" --region "$AWS_REGION" \
+              --create-bucket-configuration LocationConstraint="$AWS_REGION"
+            echo "S3 Bucket Created: $S3_BUCKET"
+          else
+            echo "S3 Bucket already exists: $S3_BUCKET"
+          fi  
           
       - name: Update S3 Bucket Policy
         run: |
